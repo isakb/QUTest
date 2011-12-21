@@ -2,9 +2,7 @@ QUTest is a QUnit based unit test runner. It was mainly created for
 simplifying the execution of unit tests from the command line with
 phantomjs.
 
-===================================
-Running tests from the command line
-===================================
+# Running tests from the command line
 
 In order to run tests with phantomjs from the commandline you need to
 install phantomjs on your machine, and then run:
@@ -14,9 +12,11 @@ install phantomjs on your machine, and then run:
 
 Instructions for building phantomjs are found there:
 http://code.google.com/p/phantomjs/wiki/BuildInstructions
+On Mac or Windows, you can use the binaries from here:
+http://code.google.com/p/phantomjs/downloads/list
 
 Your testcases should be written in JavaScript (or possibly compiled
-from e.g.  CoffeeScript to JavaScript) and can make use of either or
+from e.g. CoffeeScript to JavaScript) and can make use of either or
 both of QUnit and Pavlov.
 
 
@@ -27,9 +27,7 @@ It's possible to customize ouput a bit, e.g.:
 (Check the CONFIG in test-runner.coffee for more possible configurations.)
 
 
-===================================
-Running tests from any web browsers
-===================================
+# Running tests from any web browser
 
 You can also run the tests from any browser.
 
