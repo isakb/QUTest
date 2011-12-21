@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Run tests with phantom.js.
+# It's possible to customize ouput a bit, e.g.:
+# ./run my-test.js --show-colors=false --show-page-console=true --show-passed-tests=true
+
+[ "$PHANTOMJS" ] || PHANTOMJS=`which phantomjs`
+
+if ! [ "$PHANTOMJS" ]; then
+    echo "Please install phantom.js (and set the enviroment variable PHANTOMJS to the path of your phantomjs executable)."
+    echo "Consult the file README for instructions."
+    exit 1
+fi
+
+"$PHANTOMJS" test-runner.coffee $* --working-directory=`pwd`
