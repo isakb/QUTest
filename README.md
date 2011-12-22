@@ -8,6 +8,8 @@ In order to run tests with *phantomjs* from the commandline you need to
 install *phantomjs* on your machine, and then run:  
 `./run TESTFILE_1 [...[TESTFILE_N]]`
 
+For example:
+`./run example-test-*`
 
 Instructions for building *phantomjs* are found there:
 http://code.google.com/p/phantomjs/wiki/BuildInstructions
@@ -21,7 +23,7 @@ both of *QUnit* and *Pavlov*.
 
 
 It's possible to customize ouput a bit, e.g.:  
-`./run test*.js --show-colors=0 --show-page-console=1 --show-passed-tests=1`
+`./run example-test-*.js --show-colors=0 --show-passed-tests=1`
 
 (Check the CONFIG in `test-runner.coffee` for more possible configurations.)
 
@@ -30,16 +32,18 @@ It's possible to customize ouput a bit, e.g.:
 
 You can also run the tests from any browser.
 
-Example: To run tests from *./example.js* and *./example2.js*, open this
-URL in your web browser:
-
-`file://` **pwd** `/test.html?injects=example.js,example2.js`
-
-(Replace **pwd** with the full path to the current directory.)
-
-
-For your convenience, when tests are executed with phantomjs from the
+(For your convenience, when tests are executed with phantomjs from the
 command line the test runner will also print the corresponding URL for
 the tests, so that you can easily run the tests in your browser(s) as
-well.
+well.)
+
+To run the bundled test examples, open this URL in your web browser:
+
+`file://**cwd**/test.html?injects=example-test-qunit.js,example-test-pavlov.js`
+(**cwd** should be the full path to the current directory.)
+
+For your convenience, run something like this from your terminal:
+`x-www-browser file://$(pwd)/test.html?injects=$(echo *.js | tr ' ' ,)`
+
+Replace *x-www-browser* with *open* in OS X.
 
