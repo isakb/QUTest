@@ -1,4 +1,4 @@
-// From https://github.com/mmonteleone/pavlov/blob/master/example/example.specs.js
+// From github.com/mmonteleone/pavlov/blob/master/example/example.specs.js
 pavlov.specify("Pavlov Example", function(){
 
     describe("A feature that is being described", function(){
