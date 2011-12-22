@@ -39,7 +39,7 @@ well.)
 
 To run the bundled test examples, open this URL in your web browser:
 
-`file://**cwd**/test.html?injects=example-test-qunit.js,example-test-pavlov.js`
+`file://`**cwd**`/test.html?injects=example-test-qunit.js,example-test-pavlov.js`
 (**cwd** should be the full path to the current directory.)
 
 For your convenience, run something like this from your terminal:
