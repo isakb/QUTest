@@ -48,7 +48,22 @@ purpleStr = (str) -> coloredStr '\033[35m', str
 grayStr   = (str) -> coloredStr '\033[37m', str
 
 
+prettierErrorMessage = (msg) ->
+  res = ''
+  re = /^(\s*Died .+?: )([^$]+?) - (\{[^]+?\n    "name": ".+?"\n  \})/mg
+  while m = re.exec(msg)
+    base = m[1] + m[2]
+    try
+      details = JSON.parse(m[3])
+      details.sourceURL or= '[unknown sourceURL]'
+      details = "\n  - '#{details.name}' at #{details.sourceURL}:#{details.line}"
+    catch e
+      details = " - " + m[3]
+    res += base + details + '\n'
+  res
+
 printTestResult = (str) ->
+  str = '' + str
   matches = /\((\d+), (\d+), (\d+)\)/.exec(str)
   [failed, passed, total] = (parseInt(s, 10) for s in matches.slice(1))  if matches
   if failed? > 0
@@ -59,7 +74,7 @@ printTestResult = (str) ->
       details = ''
     str = parts[0]
   str = if failed > 0
-    redStr("[FAIL]  #{str}") + grayStr(details)
+    redStr("[FAIL]  #{str}") + grayStr(prettierErrorMessage((details)))
   else if total is 0
     yellowStr("[WARN] #{str}") + " <-- nothing to test"
   else if CONFIG.show_passed_tests
