@@ -8,10 +8,10 @@ CONFIG =
   show_passed_tests: false
   show_details:      true
   working_directory: '.'
-  test_runner:       'test.html' # relative to working_directory
+  test_page:         "test.html" # can be a full URL (file://..., or http://...); otherwise a file relative to working directory
+  tests:             []
 
 # Parse command line arguments: options for configuration, and testcases to run.
-tests = []
 try
   for arg in phantom.args
     m = /^--([^=]+)=(.*)/.exec(arg)
@@ -29,7 +29,7 @@ try
     else if /^--/.exec(arg)
       throw new Error "Invalid argument: #{arg}"
     else
-      tests.push arg
+      CONFIG.tests.push arg
 catch e
   console.error e
   console.error "Please check README for usage details."
@@ -99,27 +99,28 @@ waitFor = (testF, onReady, timeOut=3000) ->
 
 if CONFIG.debug
   console.log "Config is: " + JSON.stringify(CONFIG)
-  console.log "Tests are: " + JSON.stringify(tests)
 
 page = new WebPage()
 if CONFIG.show_page_console
   page.onConsoleMessage = (msg) ->
     console.log(purpleStr(msg))
 
-URL = "file://#{CONFIG.working_directory}/#{CONFIG.test_runner}"
+url = CONFIG.test_page
+# Check if test page url is absolute or relative (then assume file://)
+if not (/^[^:]+:\/\//).test(url)
+  url = "file://#{CONFIG.working_directory}/#{url}"
+
 console.log """If you wish to run these tests in a web browser, copy
   and go to this URL:
 
-  #{URL}?injects=#{ encodeURIComponent(''+tests) }"""
+  #{url}?injects=#{ encodeURIComponent('' + CONFIG.tests)}"""
 
-page.open URL, (status) ->
+page.open "#{url}?injects=#{CONFIG.tests}", (status) ->
   if status isnt 'success'
     console.error 'Unable to open test runner page.'
     console.error status
     phantom.exit 1
   else
-    # _injectTests is via lib/helper.js included in test.html.
-    page.evaluate "_injectTests('#{tests}')"
     waitFor ->
         page.evaluate ->
           el = document.getElementById('qunit-testresult')
