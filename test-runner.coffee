@@ -82,7 +82,7 @@ printTestResult = (str) ->
   console.log(str) if str?
 
 
-waitFor = (testF, onReady, timeOut=3000) ->
+waitFor = (testF, onReady, timeOut=30000) ->
   start = new Date().getTime()
   condition = false
   interval = setInterval ->
