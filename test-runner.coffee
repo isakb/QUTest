@@ -33,6 +33,8 @@ try
 catch e
   console.error e
   console.error "Please check README for usage details."
+  console.error "These are the possible config options with current values:"
+  console.error("  --#{key}=#{val}") for own key, val of CONFIG
   phantom.exit(1)
 
 # Return a possibly (Bash) colored version of a string.
