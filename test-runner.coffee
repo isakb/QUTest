@@ -6,7 +6,7 @@ CONFIG =
   show_colors:       true
   show_page_console: false
   show_passed_tests: false
-  show_details:      true
+  show_details:      false
   working_directory: '.'
   test_page:         "test.html" # can be a full URL (file://..., or http://...); otherwise a file relative to working directory
   tests:             []
@@ -97,18 +97,20 @@ handlePageMessage = (message) ->
   else
     console.warn "Unexpected page message received: #{JSON.stringify(message)}"
 
-total =
-  assertions: 0
-  tests: 0
-  fail: 0
-  pass: 0
-  warn: 0
+summary =
+  tests:
+    total: 0
+    failed: 0
+    passed: 0
+    warned: 0
+  assertions:
+    failed: 0
+    passed: 0
 
 maybeLog = (str) ->
   console.log(str)  if CONFIG.show_details
 
 pageMessageHandlers =
-
   begin: (m) ->
     console.log ("BEGIN")
     phantom.exit()
@@ -122,10 +124,13 @@ pageMessageHandlers =
 
   testStart: (m) ->
     maybeLog "    ↪ #{m.name}"
-    total.tests += 1
+    summary.tests.total += 1
 
   log: (m) ->
-    total.assertions += 1
+    if m.result
+      summary.assertions.passed += 1
+    else
+      summary.assertions.failed += 1
     # Log a single assertion
     name = m.message or (if m.result then '' else 'NOT  ') + 'OK (unnamed assertion)'
     indent = "        "
@@ -142,28 +147,27 @@ pageMessageHandlers =
   testDone: (m) ->
     printCompactTestResult(m)  if not CONFIG.show_details
     if m.failed
-      total.fail += 1
+      summary.tests.failed += 1
     else
-      total.pass += 1
+      summary.tests.passed += 1
       if not m.total or m.total isnt m.passed
-        total.warn += 1
-        maybeLog yellowStr "        #{symbol.warn} No assertions defined!"
+        summary.tests.warned += 1
+        maybeLog yellowStr "        #{symbol.warn} No assertions?"
 
   done: (m) ->
     duration = new Date - page.evaluate -> QUnit.config.started
     # Give the page message poller time to finish up before exiting.
     setTimeout ->
-      if CONFIG.show_details
-        console.log "Total assertions: #{total.assertions}"
-      msg = "\n#{total.pass} / #{total.tests} testcases passed, #{total.fail} failed."
-      msg += " (#{total.warn} passed with warnings)"  if total.warn
-      msg += " Duration: #{duration} ms."
+      a = summary.assertions
+      t = summary.tests
+      msg = "\n#{a.passed} / #{a.passed + a.failed} assertions ok, in #{duration} ms."
+      msg += "\n#{t.passed} / #{t.total} testcases passed (#{t.warned} with warnings); #{t.failed} testcases failed."
 
-      if total.fail
-        code = total.fail
+      if summary.tests.failed
+        code = summary.tests.failed
         console.error redStr msg
-      else if total.warn
-        code = total.warn
+      else if summary.tests.warned
+        code = summary.tests.warned
         console.warn yellowStr msg
       else
         code = 0
@@ -180,6 +184,8 @@ printCompactTestResult = (m) ->
     redStr "[FAIL] #{name}"
   else if m.total is 0
     yellowStr("[WARN] #{name}") + grayStr(" - nothing to test")
+  else if CONFIG.show_passed_tests
+    greenStr "[PASS] #{name}"
   console.log(str) if str?
 
 
