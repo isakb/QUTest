@@ -9,7 +9,6 @@ CONFIG =
   show_details:      true
   working_directory: '.'
   test_page:         "test.html" # can be a full URL (file://..., or http://...); otherwise a file relative to working directory
-  tests:             []
 
 # Parse command line arguments: options for configuration, and testcases to run.
 try
@@ -28,8 +27,6 @@ try
         throw new Error "No such config option: #{key}"
     else if /^--/.exec(arg)
       throw new Error "Invalid argument: #{arg}"
-    else
-      CONFIG.tests.push arg
 catch e
   console.error e
   console.error "Please check README for usage details."
@@ -110,12 +107,9 @@ url = CONFIG.test_page
 if not (/^[^:]+:\/\//).test(url)
   url = "file://#{CONFIG.working_directory}/#{url}"
 
-console.log """If you wish to run these tests in a web browser, copy
-  and go to this URL:
+console.log "Running headless: #{url}"
 
-  #{url}?injects=#{ encodeURIComponent('' + CONFIG.tests)}"""
-
-page.open "#{url}?injects=#{CONFIG.tests}", (status) ->
+page.open "#{url}", (status) ->
   if status isnt 'success'
     console.error 'Unable to open test runner page.'
     console.error status

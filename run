@@ -12,4 +12,4 @@ if ! [ "$PHANTOMJS" ]; then
     exit 1
 fi
 
-"$PHANTOMJS" `dirname $0`/test-runner.coffee --working-directory=`pwd` $*
+"$PHANTOMJS" `dirname $0`/test-runner.coffee $*

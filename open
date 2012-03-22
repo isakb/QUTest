@@ -1,0 +1,29 @@
+#!/bin/bash
+# Run tests with QUTest.
+
+PORT=${1:-8765}
+WWWROOT=`cd $2; pwd`
+TESTS=`cd $WWWROOT; echo $3 | tr \  ,`
+FULL_URL=http://127.0.0.1:$PORT/test.html?injects=$TESTS
+shift
+shift
+shift
+
+cd `dirname $0`
+if [[ "$*" == "--browser" ]]; then
+    (
+        sleep 1
+        echo "Opening: $FULL_URL"
+        if [ "`uname -s`" == "Darwin" ] ; then
+            open $FULL_URL
+        else
+            xdg-open $FULL_URL &> /dev/null
+        fi
+    ) &
+
+    node server $PORT $WWWROOT
+else
+    node server $PORT $WWWROOT &
+    trap "kill $!" EXIT
+    ./run --working-directory=$WWWROOT --test-page=$FULL_URL $*
+fi
