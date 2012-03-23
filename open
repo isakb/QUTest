@@ -1,16 +1,23 @@
 #!/bin/bash
 # Run tests with QUTest.
 
+SERVER_ONLY=0
+if [[ "$1" == "--server" ]]; then
+    SERVER_ONLY=1
+    shift
+fi
 PORT=${1:-8765}
 WWWROOT=`cd $2; pwd`
 TESTS=`cd $WWWROOT; echo $3 | tr \  ,`
 FULL_URL=http://127.0.0.1:$PORT/test.html?injects=$TESTS
+SERVER_COMMAND=
 shift
 shift
 shift
 
 cd `dirname $0`
-if [[ "$*" == "--browser" ]]; then
+LOGROOT=`pwd`/logs
+if [[ "$1" == "--browser" ]]; then
     (
         sleep 1
         echo "Opening: $FULL_URL"
@@ -23,7 +30,18 @@ if [[ "$*" == "--browser" ]]; then
 
     node server $PORT $WWWROOT
 else
-    node server $PORT $WWWROOT &
-    trap "kill $!" EXIT
-    ./run --working-directory=$WWWROOT --test-page=$FULL_URL $*
+    SERVER_COMMAND="node server $PORT $WWWROOT"
+    if [[ "$1" == "--coverage" ]]; then
+        shift
+        PORT2=`expr $PORT + 1`
+        SERVER_COMMAND="node lib/node-coverage/server -p $PORT -a $PORT2 -d $WWWROOT -r $LOGROOT --condition --function"
+    fi
+
+    if [[ "$SERVER_ONLY" -eq 1 ]]; then
+        $SERVER_COMMAND
+    else
+        $SERVER_COMMAND &
+        trap "kill $!" EXIT
+        ./run --working-directory=$WWWROOT --test-page=$FULL_URL $*
+    fi
 fi

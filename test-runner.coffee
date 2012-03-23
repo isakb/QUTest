@@ -10,6 +10,8 @@ CONFIG =
   working_directory: '.'
   test_page:         "test.html" # can be a full URL (file://..., or http://...); otherwise a file relative to working directory
 
+phantom.exitImmediately = true
+
 # Parse command line arguments: options for configuration, and testcases to run.
 try
   for arg in phantom.args
@@ -30,7 +32,7 @@ try
 catch e
   console.error e
   console.error "Please check README for usage details."
-  phantom.exit(1)
+  phantom.exit 1
 
 # Return a possibly (Bash) colored version of a string.
 coloredStr = (color, str) ->
@@ -83,14 +85,15 @@ waitFor = (testF, onReady, timeOut=30000) ->
   start = new Date().getTime()
   condition = false
   interval = setInterval ->
+    return  unless phantom.exitCode is undefined
     if (new Date().getTime() - start < timeOut) and not condition
       condition = testF()
     else if not condition
       console.log "'waitFor()' timeout"
-      phantom.exit(1)
+      phantom.exit 1
     else
-      onReady()
       clearInterval(interval)
+      onReady()
   , 25
 
 
@@ -98,9 +101,16 @@ if CONFIG.debug
   console.log "Config is: " + JSON.stringify(CONFIG)
 
 page = new WebPage()
-if CONFIG.show_page_console
-  page.onConsoleMessage = (msg) ->
-    console.log(purpleStr(msg))
+
+page.onConsoleMessage = (msg) ->
+  console.log(purpleStr(msg))  if CONFIG.show_page_console
+  phantom.exitImmediately = false  if msg is "_pjs_wait"
+  if msg is "_pjs_exit"
+    # TODO find a way to print short stats on code coverage
+    #exec("ls -td * | head -1", function(error, stdout, stderr) {
+    phantom.exit phantom.exitCode
+      #data = JSON.parse(fs.stdout)
+    #}
 
 url = CONFIG.test_page
 # Check if test page url is absolute or relative (then assume file://)
@@ -151,5 +161,13 @@ page.open "#{url}", (status) ->
 
       console.log f "\n#{passed} / #{total} passed tests, #{failed} failed tests.  (#{ms} ms)"
 
-      phantom.exit(if failed > 0 or total is 0 then 1 else 0)
+      phantom.exitCode = (if failed > 0 or total is 0 then 1 else 0)
 
+      if (phantom.exitImmediately is true)
+        phantom.exit phantom.exitCode
+      else
+        setTimeout () ->
+          console.log "'_pjs_exit' timeout"
+          phantom.exit 1
+
+        , 30000
