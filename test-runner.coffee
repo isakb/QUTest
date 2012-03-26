@@ -108,7 +108,6 @@ page.onConsoleMessage = (msg) ->
   if msg is "_pjs_exit"
     # TODO find a way to print short stats on code coverage
     #exec("ls -td * | head -1", function(error, stdout, stderr) {
-    # FIXME temporary
     phantom.exit phantom.exitCode
       #data = JSON.parse(fs.stdout)
     #}
@@ -124,7 +123,7 @@ page.mainStatus = ""
 page.open "#{url}", (status) ->
   # Callback is called per document loading, so ignore anything past the 1st "main" document
   # see http://code.google.com/p/phantomjs/issues/detail?id=122
-  return  unless page.mainStatus isnt ""
+  return  if page.mainStatus isnt ""
   page.mainStatus = status
   if status isnt "success"
     console.error "Unable to open test runner page."
