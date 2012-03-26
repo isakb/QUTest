@@ -7,7 +7,7 @@ CONFIG =
   show_page_console: false
   show_passed_tests: false
   show_details:      true
-  working_directory: '.'
+  working_directory: "."
   test_page:         "test.html" # can be a full URL (file://..., or http://...); otherwise a file relative to working directory
 
 phantom.exitImmediately = true
@@ -18,11 +18,11 @@ try
     m = /^--([^=]+)=(.*)/.exec(arg)
     if m
       [key, value] = m.slice(1)
-      key = key?.replace(/-/g, '_')
+      key = key?.replace(/-/g, "_")
       if CONFIG.hasOwnProperty key
         CONFIG[key] =
-          if typeof CONFIG[key] is 'boolean'
-            if value in ['false', '0', ''] then false else true
+          if typeof CONFIG[key] is "boolean"
+            if value in ["false", "0", ""] then false else true
           else
             value
       else
@@ -37,40 +37,40 @@ catch e
 # Return a possibly (Bash) colored version of a string.
 coloredStr = (color, str) ->
   if CONFIG.show_colors
-    color + str + '\033[0m'
+    color + str + "\033[0m"
   else
     str
-greenStr  = (str) -> coloredStr '\033[32m', str
-redStr    = (str) -> coloredStr '\033[31m', str
-yellowStr = (str) -> coloredStr '\033[33m', str
-purpleStr = (str) -> coloredStr '\033[35m', str
-grayStr   = (str) -> coloredStr '\033[37m', str
+greenStr  = (str) -> coloredStr "\033[32m", str
+redStr    = (str) -> coloredStr "\033[31m", str
+yellowStr = (str) -> coloredStr "\033[33m", str
+purpleStr = (str) -> coloredStr "\033[35m", str
+grayStr   = (str) -> coloredStr "\033[37m", str
 
 
 prettierErrorMessage = (msg) ->
-  res = ''
+  res = ""
   re = /^(\s*Died .+?: )([^$]+?) - (\{[^]+?\n    "name": ".+?"\n  \})/mg
   while m = re.exec(msg)
     base = m[1] + m[2]
     try
       details = JSON.parse(m[3])
-      details.sourceURL or= '[unknown sourceURL]'
-      details = "\n  - '#{details.name}' at #{details.sourceURL}:#{details.line}"
+      details.sourceURL or= "[unknown sourceURL]"
+      details = "\n  - #{details.name} at #{details.sourceURL}:#{details.line}"
     catch e
       details = " - " + m[3]
-    res += base + details + '\n'
+    res += base + details + "\n"
   res
 
 printTestResult = (str) ->
-  str = '' + str
+  str = "" + str
   matches = /\((\d+), (\d+), (\d+)\)/.exec(str)
   [failed, passed, total] = (parseInt(s, 10) for s in matches.slice(1))  if matches
   if failed? > 0
-    parts = str.split('\n')
+    parts = str.split("\n")
     if CONFIG.show_details
-      details = '\n  ' + parts.slice(1).join('\n  ')
+      details = "\n  " + parts.slice(1).join("\n  ")
     else
-      details = ''
+      details = ""
     str = parts[0]
   str = if failed > 0
     redStr("[FAIL]  #{str}") + grayStr(prettierErrorMessage((details)))
@@ -89,7 +89,7 @@ waitFor = (testF, onReady, timeOut=30000) ->
     if (new Date().getTime() - start < timeOut) and not condition
       condition = testF()
     else if not condition
-      console.log "'waitFor()' timeout"
+      console.log "waitFor() timeout"
       phantom.exit 1
     else
       clearInterval(interval)
@@ -108,6 +108,7 @@ page.onConsoleMessage = (msg) ->
   if msg is "_pjs_exit"
     # TODO find a way to print short stats on code coverage
     #exec("ls -td * | head -1", function(error, stdout, stderr) {
+    # FIXME temporary
     phantom.exit phantom.exitCode
       #data = JSON.parse(fs.stdout)
     #}
@@ -118,30 +119,35 @@ if not (/^[^:]+:\/\//).test(url)
   url = "file://#{CONFIG.working_directory}/#{url}"
 
 console.log "Running headless: #{url}"
+page.mainStatus = ""
 
 page.open "#{url}", (status) ->
-  if status isnt 'success'
-    console.error 'Unable to open test runner page.'
+  # Callback is called per document loading, so ignore anything past the 1st "main" document
+  # see http://code.google.com/p/phantomjs/issues/detail?id=122
+  return  unless page.mainStatus isnt ""
+  page.mainStatus = status
+  if status isnt "success"
+    console.error "Unable to open test runner page."
     console.error status
     phantom.exit 1
   else
     waitFor ->
         page.evaluate ->
-          el = document.getElementById('qunit-testresult')
+          el = document.getElementById("qunit-testresult")
 
           el and /completed/.test(el.innerText)
 
     , ->
       [text, testcases] = page.evaluate ->
-        tests = document.getElementById('qunit-tests').childNodes
+        tests = document.getElementById("qunit-tests").childNodes
         texts = []
         for node in tests
           text = node.innerText
           if /Rerun\s*$/m.test(text)
-            text = text.replace(/Rerun(\s*)$/m, '$1')
+            text = text.replace(/Rerun(\s*)$/m, "$1")
           texts.push text
 
-        el = document.getElementById('qunit-testresult')
+        el = document.getElementById("qunit-testresult")
         [el.innerText, texts]
 
       console.log "\nTest name (failed, passed, total)"  if testcases.length
@@ -167,7 +173,7 @@ page.open "#{url}", (status) ->
         phantom.exit phantom.exitCode
       else
         setTimeout () ->
-          console.log "'_pjs_exit' timeout"
+          console.log "_pjs_exit timeout"
           phantom.exit 1
 
         , 30000
