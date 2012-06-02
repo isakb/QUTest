@@ -6,11 +6,12 @@
 
 _DIR=`dirname $0`
 
-[ "$PHANTOMJS" ] || PHANTOMJS=`which phantomjs`
+[ "$PHANTOMJS" ] || PHANTOMJS=`which phantomjs` || PHANTOMJS=.phantomjs/bin/phantomjs
 
 if ! [ "$PHANTOMJS" ]; then
-    [ -e $_DIR/.phantomjs ] || $_DIR/install.sh
-    PHANTOMJS=$_DIR/.phantomjs/bin/phantomjs
+    echo "Please install phantom.js (and set the enviroment variable PHANTOMJS to the path of your phantomjs executable)."
+    echo "Consult the file README for instructions."
+    exit 1
 fi
 
 "$PHANTOMJS" $_DIR/test-runner.coffee --working-directory=`pwd` $*
