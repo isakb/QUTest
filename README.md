@@ -47,3 +47,9 @@ For your convenience, run something like this from your terminal:
 
 Replace *x-www-browser* with *open* in OS X.
 
+
+# Testing QUTest
+
+QUTest itself is automatically tested on BuildHive.
+
+[![Build Status](https://buildhive.cloudbees.com/job/isakb/job/QUTest/badge/icon)](https://buildhive.cloudbees.com/job/isakb/job/QUTest/)
