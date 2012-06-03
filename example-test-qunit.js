@@ -100,7 +100,7 @@ if (typeof setTimeout !== 'undefined') {
 	    setTimeout(function(){
 		ok(true);
 		start();
-	    }, 500);
+	    }, 100);
 	}
     });
 
@@ -116,7 +116,7 @@ if (typeof setTimeout !== 'undefined') {
 	    setTimeout(function(){
 		ok(true);
 		start();
-	    }, 500);
+	    }, 100);
 	}
     });
 
