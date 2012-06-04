@@ -35,7 +35,7 @@ pavlov.specify("Pavlov Example", function(){
             setTimeout(function(){
                 assert.pass();
                 resume();
-            }, 500);
+            }, 1);
         }));
 
         describe("can also have nested examples", function(){

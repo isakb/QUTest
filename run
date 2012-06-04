@@ -4,7 +4,9 @@
 # It's possible to customize ouput a bit, e.g.:
 # ./run my-test.js --show-colors=false --show-page-console=true --show-passed-tests=true
 
-[ "$PHANTOMJS" ] || PHANTOMJS=`which phantomjs`
+_DIR=`dirname $0`
+
+[ "$PHANTOMJS" ] || PHANTOMJS=`which phantomjs` || PHANTOMJS=.phantomjs/bin/phantomjs
 
 if ! [ "$PHANTOMJS" ]; then
     echo "Please install phantom.js (and set the enviroment variable PHANTOMJS to the path of your phantomjs executable)."
@@ -12,4 +14,4 @@ if ! [ "$PHANTOMJS" ]; then
     exit 1
 fi
 
-"$PHANTOMJS" `dirname $0`/test-runner.coffee $*
+"$PHANTOMJS" $_DIR/test-runner.coffee --working-directory=`pwd` $*

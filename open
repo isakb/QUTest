@@ -30,7 +30,7 @@ if [[ "$1" == "--browser" ]]; then
 
     node server $PORT $WWWROOT
 else
-    SERVER_COMMAND="node server $PORT $WWWROOT"
+    SERVER_COMMAND="node test/server $PORT $WWWROOT"
     if [[ "$1" == "--coverage" ]]; then
         shift
         PORT2=`expr $PORT + 1`
