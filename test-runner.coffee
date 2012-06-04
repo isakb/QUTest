@@ -91,35 +91,15 @@ printTestResult = (str) ->
     greenStr "[PASS]  #{str}"
   console.log(str) if str?
 
-
-waitFor = (testF, onReady, timeOut=30000) ->
-  start = new Date().getTime()
-  condition = false
-  interval = setInterval ->
-    return  unless phantom.exitCode is undefined
-    if (new Date().getTime() - start < timeOut) and not condition
-      condition = testF()
-    else if not condition
-      console.log "'waitFor()' timeout"
-      phantom.exit 1
-    else
-      clearInterval(interval)
-      onReady()
-  , 25
-
-
 if CONFIG.debug
   console.log "Config is: " + JSON.stringify(CONFIG)
 
 page = new WebPage()
+page.mainStatus = ""
 
-page.onConsoleMessage = (msg) ->
-  console.log(purpleStr(msg))  if CONFIG.show_page_console
-  phantom.exitImmediately = false  if msg is "_pjs_wait"
-  if msg is "_pjs_exit"
-    # TODO find a way to print short stats on code coverage
-    #exec("ls -td * | head -1", function(error, stdout, stderr) {
-    phantom.exit phantom.exitCode
+if CONFIG.show_page_console
+  page.onConsoleMessage = (msg) ->
+    console.log(purpleStr(msg))
 
 url = CONFIG.test_page
 # Check if test page url is absolute or relative (then assume file://)
@@ -134,7 +114,7 @@ run = ->
   page.open "#{url}?injects=#{CONFIG.tests}", (status) ->
     # Callback is called per document loading, so ignore anything past the 1st "main" document
     # see http://code.google.com/p/phantomjs/issues/detail?id=122
-    return  unless page.mainStatus isnt ""
+    return  if page.mainStatus isnt ""
     page.mainStatus = status
     if status isnt 'success'
       console.error 'Unable to open test runner page.'
@@ -233,14 +213,8 @@ pageMessageHandlers =
         code = 0
         console.log greenStr msg
 
-      phantom.exitCode = code
-
-      if (phantom.exitImmediately is true)
-        phantom.exit phantom.exitCode
-      else
-        setTimeout ->
-          console.log "'_pjs_exit' timeout"
-          phantom.exit 1
+      phantom.exit code
+    , 2 * CONFIG.poll_interval
 
 printCompactTestResult = (m) ->
   name = m.module + ': ' + m.name
