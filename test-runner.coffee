@@ -43,15 +43,15 @@ catch e
 # Return a possibly (Bash) colored version of a string.
 coloredStr = (color, str) ->
   if CONFIG.show_colors
-    color + str + '\033[0m'
+    color + str + '\x1b[0m'
   else
     str
-boldStr   = (str) -> coloredStr '\033[1m', str
-greenStr  = (str) -> coloredStr '\033[32m', str
-redStr    = (str) -> coloredStr '\033[31m', str
-yellowStr = (str) -> coloredStr '\033[33m', str
-purpleStr = (str) -> coloredStr '\033[35m', str
-grayStr   = (str) -> coloredStr '\033[37m', str
+boldStr   = (str) -> coloredStr '\x1b[1m', str
+greenStr  = (str) -> coloredStr '\x1b[32m', str
+redStr    = (str) -> coloredStr '\x1b[31m', str
+yellowStr = (str) -> coloredStr '\x1b[33m', str
+purpleStr = (str) -> coloredStr '\x1b[35m', str
+grayStr   = (str) -> coloredStr '\x1b[37m', str
 
 symbol =
   pass: "✔"
@@ -129,10 +129,13 @@ run = ->
       fun = ->
         messages = page.evaluate ->
           _phantomJSMessageQueue.splice(0)
+
+        return unless messages.length
         messages.forEach handlePageMessage
       page.poll = setInterval fun, CONFIG.poll_interval
 
 handlePageMessage = (message) ->
+  return  unless message?
   action = message.action || 'undefined'
   handle = pageMessageHandlers[action]
   if handle?
