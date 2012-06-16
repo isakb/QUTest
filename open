@@ -8,8 +8,8 @@ if [[ "$1" == "--server" ]]; then
 fi
 PORT=${1:-8765}
 WWWROOT=`cd $2; pwd`
-TESTS=`cd $WWWROOT; echo $3 | tr \  ,`
-FULL_URL=http://127.0.0.1:$PORT/test.html?injects=$TESTS
+WWWPATH=$3
+FULL_URL=http://127.0.0.1:${PORT}${WWWPATH}
 SERVER_COMMAND=
 shift
 shift
@@ -33,7 +33,7 @@ else
     SERVER_COMMAND="node test/server $PORT $WWWROOT"
     if [[ "$1" == "--coverage" ]]; then
         shift
-        PORT2=`expr $PORT + 1`
+        PORT2=$(( PORT + 1 ))
         SERVER_COMMAND="node lib/node-coverage/server -p $PORT -a $PORT2 -d $WWWROOT -r $LOGROOT --condition --function"
     fi
 
@@ -42,6 +42,6 @@ else
     else
         $SERVER_COMMAND &
         trap "kill $!" EXIT
-        ./run --working-directory=$WWWROOT --test-page=$FULL_URL $*
+        ./run --working-directory=$WWWROOT $FULL_URL
     fi
 fi

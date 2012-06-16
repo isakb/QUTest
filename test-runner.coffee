@@ -29,6 +29,8 @@ try
         throw new Error "No such config option: #{key}"
     else if /^--/.exec(arg)
       throw new Error "Invalid argument: #{arg}"
+    else if /(file|https?:\/\/)/.test(arg)
+      CONFIG.test_page = arg
     else
       CONFIG.tests.push arg
 catch e
@@ -104,12 +106,14 @@ url = CONFIG.test_page
 if not (/^[^:]+:\/\//).test(url)
   url = "file://#{CONFIG.working_directory}/#{url}"
 
+url = "#{url}?injects=#{CONFIG.tests}" if CONFIG.tests.length
+
 console.log """If you wish to run these tests in a web browser, copy
   and go to this URL:
 
-  #{url}?injects=#{ encodeURIComponent('' + CONFIG.tests)}"""
+  #{url}"""
 run = ->
-  page.open "#{url}?injects=#{CONFIG.tests}", (status) ->
+  page.open "#{url}", (status) ->
     # Callback is called per document loading, so ignore anything past the 1st "main" document
     # see http://code.google.com/p/phantomjs/issues/detail?id=122
     return  if page.mainStatus isnt ""
