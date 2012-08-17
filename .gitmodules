@@ -1,3 +1,0 @@
-[submodule "lib/node-coverage"]
-	path = lib/node-coverage
-	url = git://github.com/andreineculau/node-coverage.git

@@ -31,12 +31,6 @@ if [[ "$1" == "--browser" ]]; then
     node server $PORT $WWWROOT
 else
     SERVER_COMMAND="node test/server $PORT $WWWROOT"
-    if [[ "$1" == "--coverage" ]]; then
-        shift
-        PORT2=$(( PORT + 1 ))
-        SERVER_COMMAND="node lib/node-coverage/server -p $PORT -a $PORT2 -d $WWWROOT -r $LOGROOT --condition --function"
-    fi
-
     if [[ "$SERVER_ONLY" -eq 1 ]]; then
         $SERVER_COMMAND
     else

@@ -123,7 +123,6 @@ run = ->
       console.error status
       phantom.exit 1
     else
-      coverage.isRunning = !! page.evaluate -> window.$$_1
       startTime = new Date
       page.injectJs "lib/phantomjs-console-hook.js"
       fun = ->
@@ -143,11 +142,6 @@ handlePageMessage = (message) ->
   else
     console.warn "Unexpected page message received: #{JSON.stringify(message)}"
 
-# Code coverage done with node-coverage
-coverage =
-  isRunning: false
-  moduleCount: 0
-
 summary =
   tests:
     total: 0
@@ -166,21 +160,6 @@ pageMessageHandlers =
     console.log ("BEGIN")
     phantom.exit()
     startTime = new Date
-
-  moduleStart: (m) ->
-    coverage.moduleCount += 1
-    maybeLog " #{boldStr(m.name)}:"
-
-  moduleDone: (m) ->
-    coverage.moduleCount -= 1
-    maybeLog ""
-    if coverage.isRunning and coverage.moduleCount is 0
-      coverage.timeout = setTimeout ->
-        page.evaluate -> window.$$_1.submit('qutest')
-        setTimeout ->
-          phantom.exit 1
-        , 2500
-      , 1000
 
   testStart: (m) ->
     maybeLog "    ↪ #{m.name}"
@@ -233,7 +212,7 @@ pageMessageHandlers =
         code = 0
         console.log greenStr msg
 
-      phantom.exit(code)  unless coverage.isRunning
+      phantom.exit(code)
 
     , 2 * CONFIG.poll_interval
 
